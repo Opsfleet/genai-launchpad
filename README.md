@@ -375,5 +375,5 @@ CI (`.github/workflows/ci.yml`) runs ruff, `terraform fmt`/`validate` of `terraf
 `bootcamp.py --help` smoke test on Ubuntu, macOS and Windows on every push and pull request, plus a `pip-audit` of
 `uv.lock` and `phase2/app/*/requirements.txt` that fails on known vulnerabilities (accepted risks: advisory id +
 reason in `.pip-audit-ignore`).
-This repository is generated from the `genai-bootcamp` monorepo (`bootcamp/split/split_branches.py`); send changes
-there rather than committing here directly, or they are overwritten by the next split.
+Opsfleet publishes this repository read-only: changes committed here are overwritten by the next update. Found a
+problem? Open an issue.

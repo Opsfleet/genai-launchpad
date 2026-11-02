@@ -1,11 +1,11 @@
-# Generated branch CI (from genai-bootcamp bootcamp/split/templates/participant); edit it there, not here.
+# Published with the participant code; changes made here are overwritten by the next update.
 name: ci
 
 on:
   push:
-    branches: [bootcamp-participant]
+    branches: [main, bootcamp-participant]
   pull_request:
-    branches: [bootcamp-participant]
+    branches: [main, bootcamp-participant]
   workflow_dispatch:
 
 permissions:
