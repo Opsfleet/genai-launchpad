@@ -1,0 +1,1 @@
+# No dependencies: the handler uses the Python standard library only.

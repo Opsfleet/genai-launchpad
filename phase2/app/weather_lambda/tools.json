@@ -1,0 +1,20 @@
+[
+  {
+    "name": "get_us_forecast",
+    "description": "Get the National Weather Service forecast (next few periods: temperature, wind, conditions) for a location in the United States. US only.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "description": "Latitude of the US location in decimal degrees, e.g. 47.6062 for Seattle."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude of the US location in decimal degrees, e.g. -122.3321 for Seattle."
+        }
+      },
+      "required": ["latitude", "longitude"]
+    }
+  }
+]

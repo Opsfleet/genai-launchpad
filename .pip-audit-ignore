@@ -1,0 +1,18 @@
+# Accepted-risk advisories for the CI `pip-audit` step: one advisory id per line (PYSEC-/GHSA-/CVE-), then
+# `# <package> <version>: <why it is accepted> (<owner>, <date>, revisit by <date>)`. Empty list = fail on any known vuln.
+CVE-2026-59951
+# mcp 2.1.1: server-side only (stateful Streamable HTTP session growth); we use mcp as a client and stdio servers, phase2 mcp_server has 2.3.0; every strands-agents release caps mcp<2.2 (roi, 2026-10-18, revisit by 2026-11-15)
+CVE-2026-116685
+# mcp 2.1.1: client redirect following leaks custom headers; our clients only call our own Gateway/runtime URLs with a bearer token, which httpx drops cross-origin; fixed in 2.2.0, blocked by strands-agents' mcp<2.2 cap (roi, 2026-10-29, revisit by 2026-11-15)
+CVE-2026-116684
+# mcp 2.1.1: server-side bearer auth has no audience check; our MCP servers use no SDK auth (AgentCore Runtime's JWT authorizer validates inbound tokens); same strands cap (roi, 2026-10-29, revisit by 2026-11-15)
+CVE-2026-116686
+# mcp 2.1.1: client follows remote $ref in a tool's outputSchema; every MCP server we connect to is our own; same strands cap (roi, 2026-10-29, revisit by 2026-11-15)
+GHSA-7xgj-8392-5q4r
+# fastmcp 4.1.1: OAuth authorization bypass in FastMCP's auth providers; we use none (Phase 1 stdio server, Phase 2 runtime behind AgentCore's JWT authorizer); 4.1.2 needs mcp>=2.2, blocked by the strands cap (roi, 2026-10-29, revisit by 2026-11-15)
+GHSA-vqqp-x5qm-5qp4
+# fastmcp 4.1.1: OAuth client credential binding; we never use FastMCP's OAuth client; same as above (roi, 2026-10-29, revisit by 2026-11-15)
+CVE-2026-114603
+# opentelemetry-api 1.44.0 (agent runtime): O(n^2) tracestate parsing; the runtime is reachable only through AgentCore's JWT authorizer; aws-opentelemetry-distro 0.21.0 (latest) pins 1.44.0 (roi, 2026-10-29, revisit by 2026-11-15)
+CVE-2026-116694
+# opentelemetry-propagator-jaeger 1.44.0 (agent runtime): unbounded uberctx baggage; the Jaeger propagator is not enabled (ADOT uses tracecontext, baggage and X-Ray); pinned by aws-opentelemetry-distro 0.21.0 (roi, 2026-10-29, revisit by 2026-11-15)

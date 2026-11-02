@@ -1,0 +1,48 @@
+# LLM-as-a-judge rubrics (Phase 2 Task 6, Part C), scored by your `rubric_judge` evaluator: the Lambda
+# phase2/app/rubric_judge/handler.py packages this file, fills one entry (terraform variable judge_rubric, default
+# datastream_rubric) with each agent turn and asks the judge model through LiteLLM (billed to your budget). Stage 6
+# registers it as awsworkshop_<you>_rubric_judge: `uv run bootcamp.py eval --evaluators rubric_judge` scores your
+# golden set with it, and your online evaluation scores live traffic. After editing, `uv run bootcamp.py deploy`.
+#
+# name:         letters, digits and _
+# instructions: the judge prompt, graded per agent turn. Placeholders: {context} (the turn's conversation: question,
+#               tool calls with their inputs and results), {assistant_turn} (the answer) and {expected_response}
+#               (the golden answer in `eval`; "(no reference answer for this turn)" for live traffic).
+# scale:        the scores the judge may give (0..1), each with a label and a definition it must follow; the judge's
+#               score is snapped to the nearest value.
+
+- name: datastream_rubric
+  description: DataStream answer quality - exact numbers from the data, names the scope, no speculation.
+  instructions: |
+    You grade one answer of DataStream Corp's executive assistant. The assistant can query the company database
+    (employees, departments, projects, budgets) and a US-only weather service.
+
+    Rubric:
+    1. Exact data: every number or fact the answer states comes from a tool result in the context, unrounded
+       (481, not "about 500"). No numbers without a source.
+    2. Scope: the answer names what the number is about (the department, project or place) so it stands alone.
+    3. No speculation: no guesses, estimates, forecasts or placeholders. When the data is missing, or a request is
+       out of scope or refused (writes to the database, non-US weather), the answer says so plainly instead.
+    4. Reference: when a reference answer is given below, it is the ground truth. A number in the answer that
+       contradicts it (a different count, total or amount for the same thing) scores 0, however confident or well
+       sourced the answer looks. Without a reference, grade rules 1-3 only.
+
+    Reference answer:
+    {expected_response}
+
+    Context (the conversation so far, including tool calls and their results):
+    {context}
+
+    Answer to grade:
+    {assistant_turn}
+  scale:
+    - value: 1.0
+      label: Grounded
+      definition: Meets every rule; or an honest, clear refusal or "no data" answer when that is correct.
+    - value: 0.5
+      label: Partly grounded
+      definition: The data is right but one rule is bent (rounded number, scope unclear, or a speculative extra).
+    - value: 0.0
+      label: Ungrounded
+      definition: States a number or fact not supported by the tool results or contradicting the reference answer, or
+        guesses instead of saying it cannot.

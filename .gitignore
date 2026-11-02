@@ -1,0 +1,8 @@
+.env
+.venv/
+.build/
+__pycache__/
+terraform/**/.terraform/
+terraform/**/terraform.tfstate*
+terraform/**/terraform.tfstate.d/
+.invites/

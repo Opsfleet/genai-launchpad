@@ -1,0 +1,4 @@
+datastream_corp.db
+sessions/
+__pycache__/
+datastream_corp.db-*

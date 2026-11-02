@@ -1,0 +1,82 @@
+# Generated branch CI (from genai-bootcamp bootcamp/split/templates/participant); edit it there, not here.
+name: ci
+
+on:
+  push:
+    branches: [bootcamp-participant]
+  pull_request:
+    branches: [bootcamp-participant]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  audit:
+    name: pip-audit (known vulnerabilities)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: audit uv.lock and the AgentCore runtime requirements (accepted risks in .pip-audit-ignore)
+        shell: bash
+        run: |
+          shopt -s nullglob
+          uv export --quiet --frozen --no-hashes --all-groups --no-emit-project -o "$RUNNER_TEMP/uv-lock-requirements.txt"
+          ignores=()
+          while read -r id _; do ignores+=(--ignore-vuln "$id"); done < <(grep -vE '^[[:space:]]*(#|$)' .pip-audit-ignore || true)
+          for requirements in "$RUNNER_TEMP/uv-lock-requirements.txt" phase2/app/*/requirements.txt; do
+            echo "::group::pip-audit $requirements"
+            uvx pip-audit@2.10.1 --strict --no-deps --disable-pip --progress-spinner off "${ignores[@]}" -r "$requirements"
+            echo "::endgroup::"
+          done
+
+  test:
+    name: pytest + CLI smoke (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run pytest -q
+      - run: uv run bootcamp.py --help
+
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1  # validate needs a region; no credentials are used
+    defaults:
+      run:
+        working-directory: terraform/participant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.0"
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
