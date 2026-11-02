@@ -45,7 +45,7 @@ Runtimes + Gateway ─► CloudWatch GenAI Observability (5, aws/spans) ─► A
 
 ## Participant setup
 ```bash
-git clone --branch bootcamp-participant --single-branch https://github.com/Opsfleet/agentic-workshop-aws.git datastream-bootcamp
+git clone https://github.com/Opsfleet/genai-launchpad.git datastream-bootcamp
 cd datastream-bootcamp    # every command runs from here
 uv sync
 cp .env.example .env      # Windows: copy .env.example .env
