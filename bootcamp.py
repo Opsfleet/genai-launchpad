@@ -102,6 +102,10 @@ class Context(cli.Context):
         """MODEL_ID from .env, else the class default your instructor chose (`llm models` marks it)."""
         return self.settings.model_id or self.gateway().get("default_model", "")
 
+    def runtime_model_id(self) -> str:
+        """The model's Bedrock ID for the deployed agent, so Observability can price its traces (gateway alias)."""
+        return self.gateway().get("bedrock_ids", {}).get(self.model_id(), self.model_id())
+
     def _gateway_problem(self, error: ClientError) -> str:
         code = error.response.get("Error", {}).get("Code", "")
         where = f"participant '{self.settings.participant}' in region {self.settings.region}"
@@ -124,7 +128,7 @@ def apply_stage(ctx: Context, args: argparse.Namespace, stage: int) -> dict:
         build_app("code_evaluator")
         build_app("rubric_judge")
     tf.prepare(PARTICIPANT_DIR, ctx.env, ctx.settings.participant)
-    variables = participant_vars(ctx.settings, stage, ctx.gateway()["base_url"], ctx.model_id())
+    variables = participant_vars(ctx.settings, stage, ctx.gateway()["base_url"], ctx.runtime_model_id())
     tf.run_live(PARTICIPANT_DIR, ["apply", "-input=false", *variables, *approve_flags(args)], ctx.env, ctx.verbose)
     return tf.outputs(PARTICIPANT_DIR, ctx.env)
 

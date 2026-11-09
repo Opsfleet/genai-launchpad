@@ -2,6 +2,7 @@
 
 import sqlite3
 import sys
+from contextlib import closing
 from pathlib import Path
 
 import httpx
@@ -85,7 +86,7 @@ def test_gateway_off_at_night_fails_the_call_with_its_hours() -> None:
 
 def _database(tmp_path: Path, script: str) -> Path:
     db = tmp_path / "datastream_corp.db"
-    with sqlite3.connect(db) as conn:
+    with closing(sqlite3.connect(db)) as conn:
         conn.executescript(script)
     return db
 

@@ -5,6 +5,7 @@ Run alone: uv run pytest tests/test_phase1_tasks.py
 
 import sqlite3
 import sys
+from contextlib import closing
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -128,6 +129,6 @@ def test_an_empty_database_file_is_not_a_usable_copy(tmp_path: Path) -> None:
     assert not t0_setup.has_database(db)
     sqlite3.connect(db).close()
     assert db.exists() and not t0_setup.has_database(db)
-    with sqlite3.connect(db) as conn:
+    with closing(sqlite3.connect(db)) as conn:
         conn.executescript(SCHEMA)
     assert t0_setup.has_database(db)
