@@ -5,3 +5,5 @@ boto3>=1.40
 httpx>=0.28
 aws-opentelemetry-distro>=0.12
 websockets>=13
+opentelemetry-instrumentation-openai-v2==2.4b0
+opentelemetry-util-genai==1.1b0
