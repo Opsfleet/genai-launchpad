@@ -23,7 +23,9 @@ BUILD_DIR = ROOT / ".build"
 SHARED_DIR = ROOT / "shared"
 APP_EXTRA_FILES = {"rubric_judge": (ROOT / "phase2" / "evals" / "evaluators.yaml",)}
 """Files from outside `phase2/app/<name>/` that an app zip also needs (copied to its root): the judge's rubrics."""
-DB_URL = "https://d1ck76obc96z7d.cloudfront.net/assets/database/datastream_corp.db"
+DB_URL = "https://genai-launchpad.aws.opsfleet.com/assets/datastream_corp.db"
+DB_SHA256 = "41a50fc1f8a64f41fd476f2c01189c2dec9928ed75e8f85e58ddbc71f3e6b575"
+"""Checksum of the published copy: a truncated or wrong download fails loudly instead of as 'no such table'."""
 OTEL_SHIM = (
     "#!/usr/bin/env python3\n"
     "import sys\n"
@@ -145,6 +147,8 @@ def seed_database() -> Path:
         BUILD_DIR.mkdir(exist_ok=True)
         response = requests.get(DB_URL, timeout=60)
         response.raise_for_status()
+        if hashlib.sha256(response.content).hexdigest() != DB_SHA256:
+            raise RuntimeError(f"{DB_URL} did not match the expected checksum; download it again")
         _atomic_write(target, lambda path: path.write_bytes(response.content))
     lab_data.ensure_helpdesk_tickets(target)
     return target

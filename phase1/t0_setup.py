@@ -5,6 +5,7 @@ terminated employees. They make the "active employees only" and "keep empty depa
 visible; every active count stays as downloaded (1,201 active employees).
 """
 
+import hashlib
 import sqlite3
 import sys
 from contextlib import closing
@@ -17,7 +18,9 @@ from strands import Agent
 
 from common import AWS_REGION, DB_PATH, MODEL_ID, litellm_gateway, make_model
 
-DB_URL = "https://d1ck76obc96z7d.cloudfront.net/assets/database/datastream_corp.db"
+DB_URL = "https://genai-launchpad.aws.opsfleet.com/assets/datastream_corp.db"
+DB_SHA256 = "41a50fc1f8a64f41fd476f2c01189c2dec9928ed75e8f85e58ddbc71f3e6b575"
+"""Checksum of the published copy: a truncated or wrong download fails loudly instead of as 'no such table'."""
 EMPTY_DEPARTMENT = ("Research", "Applied research; the team is hired next quarter", 400000)
 TERMINATED_EMPLOYEES = [
     ("DS1202", "Mark", "Ellis", "Senior Software Engineer", "Engineering", 128000, "2021-03-15"),
@@ -52,6 +55,8 @@ def download_database() -> str:
     if not has_database(DB_PATH):
         response = requests.get(DB_URL, timeout=60)
         response.raise_for_status()
+        if hashlib.sha256(response.content).hexdigest() != DB_SHA256:
+            raise RuntimeError(f"{DB_URL} did not match the expected checksum; download it again")
         DB_PATH.write_bytes(response.content)
     add_phase1_rows()
     return f"{DB_PATH.name} ({DB_PATH.stat().st_size:,} bytes)"
