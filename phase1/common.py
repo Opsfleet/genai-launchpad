@@ -239,8 +239,18 @@ class ContextPrinter(HookProvider):
             verb = "summarized" if isinstance(self.manager, SummarizingConversationManager) else "dropped"
             size = f"~{event.projected_input_tokens:,}" if event.projected_input_tokens else "?"
             limit = event.agent.model.context_window_limit or 0
-            print(f"\n[context] prompt {size} of {limit:,} tokens: older messages {verb} ({removed} so far)")
+            counts = f"{removed} so far, {len(event.agent.messages)} kept"
+            print(f"\n[context] prompt {size} of {limit:,} tokens: older messages {verb} ({counts})")
+            self.print_summary()
         self.seen = removed
+
+    def print_summary(self) -> None:
+        """Print the summary that now stands in for the older messages (saved with the session's agent.json)."""
+        summary = getattr(self.manager, "_summary_message", None)
+        if summary:
+            text = "\n".join(block["text"] for block in summary["content"] if "text" in block)
+            print("[context] summary (saved in sessions/session_<id>/agents/agent_default/agent.json):")
+            print("\n".join(f"  {line}" for line in text.strip().splitlines()))
 
 
 def _starts_tool(event: dict) -> bool:

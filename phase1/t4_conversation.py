@@ -6,14 +6,15 @@ from strands.session import FileSessionManager
 
 from common import SESSIONS_DIR, SYSTEM_PROMPT, ContextPrinter, make_mcp_client, make_model, run, session_id
 
-CONTEXT_WINDOW_TOKENS = 2700
-"""Deliberately tiny (real models take ~200k). The system prompt and tool description alone take 1,000-1,300 tokens,
-so with the 0.7 threshold (1,890 tokens) summarization starts during or after the database question, not on the first
-turn. A summary must bring the prompt well below the threshold, or the manager summarizes again before every call."""
+CONTEXT_WINDOW_TOKENS = 1000
+"""Deliberately tiny (real models take ~200k), tuned on the suggested model: the system prompt and tool description
+take ~340 tokens, the department table brings the prompt to ~650, and a message or two later it passes the 0.7
+threshold (700 tokens). A short summary drops it back to ~400, leaving room for several messages before the next
+summary. Another model's tokenizer may need another value."""
 
 SUMMARY_PROMPT = """Summarize the conversation so far as short bullet points in the third person.
 Keep every fact the user stated about themselves (name, role, preferences such as a favorite color).
-Give each tool result one short line. Do not address the user."""
+Give each tool result one short line: never copy a table or a list of rows. Do not address the user."""
 """Strands' default summary lists topics and tool results and may drop personal facts; this one keeps them."""
 
 

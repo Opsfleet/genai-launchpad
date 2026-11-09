@@ -22,10 +22,11 @@ from common import (  # noqa: E402
     session_id,
 )
 
-CONTEXT_WINDOW_TOKENS = 2700
-"""Deliberately tiny (real models take ~200k). The system prompt and tool description alone take 1,000-1,300 tokens,
-so with the 0.7 threshold (1,890 tokens) summarization starts during or after the database question, not on the first
-turn. A summary must bring the prompt well below the threshold, or the manager summarizes again before every call."""
+CONTEXT_WINDOW_TOKENS = 1000
+"""Deliberately tiny (real models take ~200k), tuned on the suggested model: the system prompt and tool description
+take ~340 tokens, the department table brings the prompt to ~650, and a message or two later it passes the 0.7
+threshold (700 tokens). A short summary drops it back to ~400, leaving room for several messages before the next
+summary. Another model's tokenizer may need another value."""
 
 
 def build_conversation_manager():

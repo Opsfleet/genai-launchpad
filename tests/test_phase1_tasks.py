@@ -85,7 +85,8 @@ class FakeManager(common.SummarizingConversationManager):
 
 def _model_call(tokens: int) -> SimpleNamespace:
     return SimpleNamespace(
-        projected_input_tokens=tokens, agent=SimpleNamespace(model=SimpleNamespace(context_window_limit=2700))
+        projected_input_tokens=tokens,
+        agent=SimpleNamespace(model=SimpleNamespace(context_window_limit=2700), messages=[{}, {}, {}]),
     )
 
 
@@ -94,10 +95,13 @@ def test_context_line_only_when_messages_were_just_summarized(capsys: pytest.Cap
     printer = common.ContextPrinter(manager)
     printer.show(_model_call(900))
     manager.removed_message_count = 3
+    manager._summary_message = {"role": "user", "content": [{"text": "- The user is Jordan.\n- Favorite color: blue."}]}
     printer.show(_model_call(1500))
     printer.show(_model_call(1100))
-    out = capsys.readouterr().out.strip()
-    assert out == "[context] prompt ~1,500 of 2,700 tokens: older messages summarized (3 so far)"
+    out = capsys.readouterr().out.strip().splitlines()
+    assert out[0] == "[context] prompt ~1,500 of 2,700 tokens: older messages summarized (3 so far, 3 kept)"
+    assert out[2:] == ["  - The user is Jordan.", "  - Favorite color: blue."]
+    assert len(out) == 4
 
 
 def test_report_total_must_equal_the_departments() -> None:
