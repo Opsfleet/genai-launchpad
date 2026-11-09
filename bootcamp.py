@@ -290,7 +290,7 @@ def _invoke(ctx: Context, args: argparse.Namespace, out: dict) -> int:
     participant, where = ctx.settings.participant, "local agent" if args.local else "agent"
     session_id = invoke.resolve_session(args.session, participant)
     token = users.user_token(ctx.session, out, args.actor)
-    log.info("Asking your %s as %s (usually 20s-2m, up to ~5 min on a cold start)...", where, args.actor)
+    log.info("Asking your %s as %s (usually 10-40 s, a few more on a cold start)...", where, args.actor)
     invoke.remember(participant, session_id, args.actor, args.prompt)
     ask = _stream_reply if args.stream else _json_reply
     reply, tools = ask(out, token, args, session_id)
