@@ -93,11 +93,11 @@ jsonschema==4.26.0
     #   strands-agents
 jsonschema-specifications==2025.9.1
     # via jsonschema
-mcp==2.3.0
+mcp==2.2.0
     # via
     #   -r requirements.in
     #   strands-agents
-mcp-types==2.3.0
+mcp-types==2.2.0
     # via mcp
 openai==3.46.0
     # via strands-agents

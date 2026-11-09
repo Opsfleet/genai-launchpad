@@ -1,6 +1,6 @@
 bedrock-agentcore>=1.0
 strands-agents[otel,openai]>=1.58,<2
-mcp>=2.1
+mcp>=2.2,<2.3
 boto3>=1.40
 httpx>=0.28
 aws-opentelemetry-distro>=0.12
