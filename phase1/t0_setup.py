@@ -7,6 +7,8 @@ visible; every active count stays as downloaded (1,201 active employees).
 
 import sqlite3
 import sys
+from contextlib import closing
+from pathlib import Path
 
 import boto3
 import openai
@@ -32,9 +34,22 @@ INSERT_TERMINATED = """INSERT OR IGNORE INTO employees
     FROM departments WHERE name = ?"""
 
 
+def has_database(path: Path) -> bool:
+    """Whether `path` holds the real database, not the empty file `sqlite3.connect` creates when something opened it
+    before this task downloaded it."""
+    if not path.exists():
+        return False
+    try:
+        with closing(sqlite3.connect(f"{path.as_uri()}?mode=ro", uri=True)) as conn:
+            conn.execute("SELECT 1 FROM employees LIMIT 1")
+    except sqlite3.DatabaseError:
+        return False
+    return True
+
+
 def download_database() -> str:
-    """Download the database once, then add the Phase 1 rows (idempotent)."""
-    if not DB_PATH.exists():
+    """Download the database unless a usable copy is already here, then add the Phase 1 rows (idempotent)."""
+    if not has_database(DB_PATH):
         response = requests.get(DB_URL, timeout=60)
         response.raise_for_status()
         DB_PATH.write_bytes(response.content)

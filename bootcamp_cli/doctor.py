@@ -1,19 +1,23 @@
 """Participant pre-flight before day 1 (`uv run bootcamp.py doctor`): is this laptop ready for the bootcamp?
 
-Checks the local toolchain (OS, Python, uv, Terraform, AWS CLI, disk), the `.env` settings, the AWS chain (your own
-credentials, then the bootcamp-participant-<you> role, your gateway secret, one tiny keyless LiteLLM call and your
-remaining budget, and that direct Bedrock is denied as designed) and the network endpoints the tasks reach. It creates
-nothing, finishes in well under 30 s (checks run concurrently) and exits 1 when anything failed.
+Checks the local toolchain (OS, Python, uv, Terraform, AWS CLI, disk), the Phase 1 database copy, the `.env`
+settings, the AWS chain (your own credentials, then the bootcamp-participant-<you> role, your gateway secret, one tiny
+keyless LiteLLM call and your remaining budget, and that direct Bedrock is denied as designed) and the network
+endpoints the tasks reach. It creates nothing, finishes in well under 30 s (checks run concurrently) and exits 1
+when anything failed.
 """
 
 import logging
 import platform
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 from collections.abc import Callable
+from contextlib import closing
 from functools import partial
+from pathlib import Path
 
 import boto3
 import httpx
@@ -34,6 +38,8 @@ TOOL_TIMEOUT = 15.0
 DIRECT_BEDROCK_MODEL = "amazon.nova-micro-v1:0"
 """Cheap and enabled in most accounts, so a denial proves the IAM deny rather than missing model access."""
 TERRAFORM_VERSIONS = ROOT / "terraform" / "participant" / "versions.tf"
+PHASE1_DB = ROOT / "phase1" / "datastream_corp.db"
+FRESH_DB = "delete phase1/datastream_corp.db, then run `uv run bootcamp.py phase1 t0`"
 SUPPORTED_SYSTEMS = {"Darwin": "macOS", "Linux": "Linux", "Windows": "Windows"}
 NETWORK_TARGETS = {
     "Cognito": "https://cognito-idp.{region}.amazonaws.com/",
@@ -141,9 +147,22 @@ def network_checks(region: str) -> list[Callable[[], Result]]:
     return [partial(check_network, name, url.format(region=region)) for name, url in NETWORK_TARGETS.items()]
 
 
+def check_database(path: Path = PHASE1_DB) -> Result:
+    """Phase 1's own copy of the database: downloaded, and not the empty file `sqlite3.connect` leaves behind when
+    something opens the database before Task 0 has downloaded it. Opened read-only, so this check never creates it."""
+    if not path.exists():
+        return warned("Phase 1 database", "not downloaded yet", "run `uv run bootcamp.py phase1 t0`")
+    try:
+        with closing(sqlite3.connect(f"{path.as_uri()}?mode=ro", uri=True)) as conn:
+            active = conn.execute("SELECT COUNT(*) FROM employees WHERE status = 'active'").fetchone()[0]
+    except sqlite3.DatabaseError as error:
+        return failed("Phase 1 database", f"{path.name} is unusable ({error})", FRESH_DB)
+    return passed("Phase 1 database", f"{active:,} active employees")
+
+
 def local_checks() -> list[Callable[[], Result]]:
     """Toolchain and disk checks (no AWS, no network)."""
-    return [check_os, check_python, check_uv, check_terraform, check_aws_cli, check_disk]
+    return [check_os, check_python, check_uv, check_terraform, check_aws_cli, check_disk, check_database]
 
 
 class AwsChain:

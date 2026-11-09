@@ -117,3 +117,13 @@ def test_session_id_prefers_the_cli_session(monkeypatch: pytest.MonkeyPatch) -> 
     assert common.session_id("alice_session") == "alice_session"
     monkeypatch.setenv(common.SESSION_ENV, "bob")
     assert common.session_id("alice_session") == "bob"
+
+
+def test_an_empty_database_file_is_not_a_usable_copy(tmp_path: Path) -> None:
+    db = tmp_path / "datastream_corp.db"
+    assert not t0_setup.has_database(db)
+    sqlite3.connect(db).close()
+    assert db.exists() and not t0_setup.has_database(db)
+    with sqlite3.connect(db) as conn:
+        conn.executescript(SCHEMA)
+    assert t0_setup.has_database(db)

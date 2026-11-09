@@ -25,6 +25,8 @@ def query_db(query: str) -> str:
     Status values are lowercase: employees.status is 'active' or 'terminated' (headcount counts only 'active'),
     projects.status is 'planning', 'active' or 'completed'. Department names are capitalized, e.g. 'Engineering'.
     """
+    if not DB_PATH.exists():
+        return "Error: the database is not downloaded yet; run `uv run bootcamp.py phase1 t0` first."
     try:
         with sqlite3.connect(DB_PATH) as conn:
             return str(conn.execute(query).fetchall())

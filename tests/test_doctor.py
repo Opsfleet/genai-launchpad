@@ -1,5 +1,6 @@
 """`bootcamp.py doctor`: version parsing, budget and network verdicts, and the AWS chain's skip-after-failure."""
 
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -80,3 +81,21 @@ def test_gateway_off_at_night_fails_the_call_with_its_hours() -> None:
     error = httpx.HTTPStatusError("503", request=request, response=httpx.Response(503, request=request, text="<html>"))
     result = chain._call_failure(error)
     assert result.status is report.Status.FAIL and "08:00-22:00" in result.fix
+
+
+def _database(tmp_path: Path, script: str) -> Path:
+    db = tmp_path / "datastream_corp.db"
+    with sqlite3.connect(db) as conn:
+        conn.executescript(script)
+    return db
+
+
+def test_database_check_passes_warns_and_fails(tmp_path: Path) -> None:
+    good = _database(tmp_path, "CREATE TABLE employees (status TEXT); INSERT INTO employees VALUES ('active');")
+    assert doctor.check_database(good).status is report.Status.PASS
+    good.unlink()
+    assert doctor.check_database(good).status is report.Status.WARN
+    assert not good.exists()
+    empty = _database(tmp_path, "")
+    result = doctor.check_database(empty)
+    assert result.status is report.Status.FAIL and "phase1 t0" in result.fix
