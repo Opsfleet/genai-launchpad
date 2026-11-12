@@ -4,6 +4,7 @@ import configparser
 import stat
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import boto3
 import pytest
@@ -109,3 +110,44 @@ def test_instructor_children_get_frozen_keys() -> None:
     env = aws.AwsAccess(session).child_env({"AWS_PROFILE": "sb"})
     assert env["AWS_ACCESS_KEY_ID"] == "AKIDEXAMPLE"
     assert "AWS_PROFILE" not in env and "AWS_CONFIG_FILE" not in env
+
+
+class FakeBase:
+    """A base session whose caller identity and credential source the test picks."""
+
+    region_name = "us-east-1"
+
+    def __init__(self, arn: str = "", method: str = "shared-credentials-file") -> None:
+        self.arn, self.method = arn, method
+
+    def client(self, _service: str) -> "FakeBase":
+        return self
+
+    def get_caller_identity(self) -> dict[str, str]:
+        return {"Arn": self.arn, "Account": "123456789012"}
+
+    def get_credentials(self) -> SimpleNamespace:
+        return SimpleNamespace(method=self.method)
+
+
+@pytest.mark.parametrize(
+    ("arn", "expected"),
+    [
+        ("arn:aws:sts::123456789012:assumed-role/bootcamp-participant-dawson/SageMaker", None),
+        ("arn:aws:iam::123456789012:user/bootcamp/bootcamp-dawson", ROLE),
+        ("arn:aws:sts::123456789012:assumed-role/bootcamp-participant-dawsonx/SageMaker", ROLE),
+    ],
+)
+def test_studio_space_already_runs_as_the_participant_role(arn: str, expected: str | None) -> None:
+    assert aws.role_to_assume(FakeBase(arn), settings()) == expected
+
+
+def test_explicit_role_arn_skips_the_identity_lookup() -> None:
+    explicit = Settings(participant="dawson", region="us-east-1", model_id="m", profile="", role_arn="arn:x")
+    assert aws.role_to_assume(FakeBase(), explicit) == "arn:x"
+
+
+def test_container_credentials_pass_through_to_children_unfrozen() -> None:
+    env = aws.AwsAccess(FakeBase(method="container-role")).child_env({"AWS_CONTAINER_CREDENTIALS_RELATIVE_URI": "/c"})
+    assert env["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"] == "/c"
+    assert "AWS_ACCESS_KEY_ID" not in env

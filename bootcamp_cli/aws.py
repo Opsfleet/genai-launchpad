@@ -25,12 +25,18 @@ log = logging.getLogger(__name__)
 STATIC_KEY_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
 CREDENTIAL_VARS = (*STATIC_KEY_VARS, "AWS_SECURITY_TOKEN", "AWS_PROFILE", "AWS_DEFAULT_PROFILE")
 BASE_PROFILE = "bootcamp-base"
+REFRESHING_METHODS = ("container-role", "iam-role")
+"""Credential sources that renew themselves in every child process (a Studio space, an EC2 instance role)."""
 
 
-def participant_role_arn(base: boto3.Session, participant: str) -> str:
+def participant_role_arn(account: str, participant: str) -> str:
     """ARN of the tag-isolated role the instructor's account stack created for `participant`."""
-    account = base.client("sts").get_caller_identity()["Account"]
     return f"arn:aws:iam::{account}:role/bootcamp/bootcamp-participant-{participant}"
+
+
+def runs_as_participant(caller_arn: str, participant: str) -> bool:
+    """True when the base credentials already ARE the participant role (a Studio space runs as it)."""
+    return f":assumed-role/bootcamp-participant-{participant}/" in caller_arn
 
 
 def user_config_path() -> Path:
@@ -139,19 +145,31 @@ class AwsAccess:
         env |= {"AWS_REGION": region, "AWS_DEFAULT_REGION": region}
         if self.config_file:
             return env | {"AWS_CONFIG_FILE": str(self.config_file), "AWS_PROFILE": self.profile}
+        if self.session.get_credentials().method in REFRESHING_METHODS:
+            return env
         return env | frozen_credentials(self.session)
+
+
+def role_to_assume(base: boto3.Session, settings: Settings) -> str | None:
+    """The participant role ARN to assume, or None when the base credentials already are that role."""
+    if settings.role_arn:
+        return settings.role_arn
+    identity = base.client("sts").get_caller_identity()
+    if runs_as_participant(identity["Arn"], settings.participant):
+        return None
+    return participant_role_arn(identity["Account"], settings.participant)
 
 
 def make_access(settings: Settings, as_participant: bool = True) -> AwsAccess:
     """AWS access for this run.
 
-    Participants get the refreshing bootcamp-<name> profile unless BOOTCAMP_ROLE_ARN is "none" (use the base
-    profile as-is); instructors always use their base profile.
+    Participants get the refreshing bootcamp-<name> profile unless BOOTCAMP_ROLE_ARN is "none" or the base
+    credentials already are their role (a Studio space): then the base session is used as-is, like instructors.
     """
     base = boto3.Session(profile_name=settings.profile or None, region_name=settings.region)
-    if not as_participant or settings.role_arn.lower() == "none":
+    role_arn = None if not as_participant or settings.role_arn.lower() == "none" else role_to_assume(base, settings)
+    if role_arn is None:
         return AwsAccess(base)
-    role_arn = settings.role_arn or participant_role_arn(base, settings.participant)
     config_file = write_private_config(bootcamp_config(read_user_config(), settings, role_arn, dict(os.environ)))
     session = profile_session(config_file, profile_name(settings), settings.region)
     log.debug("Using %s as bootcamp-%s (credentials refresh automatically)", role_arn, settings.participant)

@@ -56,6 +56,13 @@ your own password, then create a CLI access key (account menu > Security credent
 until you set it); `AWS_PROFILE=bootcamp` is already set. The CLI assumes `bootcamp-participant-<you>` automatically; in the
 console, use the switch-role link from the email to see your agents, logs and traces.
 
+**Browser workspace (when your instructor enabled it):** your invitation email says so. Sign in, switch to your
+workshop role, then search the console for "SageMaker AI" > Studio > Open Studio > Code Editor > your space (your
+name) > Run space, then Open. Everything above is already done there: the repo is in `~/datastream-bootcamp`, `.env`
+is filled in, and the CLI uses your workshop role without an access key. Open a terminal and start with
+`cd ~/datastream-bootcamp && uv run bootcamp.py doctor`. The space stops after an hour without activity; your files
+stay.
+
 | `.env` key | Meaning |
 |---|---|
 | `PARTICIPANT` | Your roster name (required; blank in `.env.example`) |
