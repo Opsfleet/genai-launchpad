@@ -143,3 +143,12 @@ Behind a proxy or firewall, HTTPS must reach:
 - AWS APIs (`*.amazonaws.com`), the bootcamp gateway and site your instructor shares
 - Python packages and Terraform providers (`pypi.org`, `files.pythonhosted.org`, `registry.terraform.io`, `releases.hashicorp.com`)
 Stuck? Run `uv run bootcamp.py doctor --verbose` and send the output to your instructor before the workshop.
+## Getting updates during the class
+When your instructor announces an update, pull it from the project folder. Stash your own edits first (a plain `git pull` refuses to overwrite files you changed) and bring them back after:
+
+terminal:
+```bash
+git stash && git pull && git stash pop
+```
+
+If `stash pop` reports a conflict, keep your version of the file or ask your instructor.
