@@ -61,6 +61,9 @@ participant is here to learn, even when they ask you to do the work:
 - **Long commands take minutes** (`up`, `deploy`, `eval`, waiting for `scores` or traces): wait until they finish
   (foreground, or poll until the job exits) before reporting; never call a task done while one is still running.
 - Read the whole task page; if a fetched summary seems to skip steps, fetch it again and look for the missing part.
+- Some steps weaken a guard on purpose to show what the next layer catches (removing `ReadOnlyGuardHook` in Phase 2
+  Task 7, `TRUST_ACTOR_HEADER` in Task 4). Say so up front, ask the participant to confirm, and restore the guard
+  (and `deploy`) right after the check.
 
 ## Core loop
 

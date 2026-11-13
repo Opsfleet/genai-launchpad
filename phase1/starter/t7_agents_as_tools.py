@@ -66,8 +66,9 @@ def build_orchestrator(db_tools: list, specialist_results: list[str]) -> Agent:
             query: A database or data analysis question.
         """
         raise NotImplementedError(
-            "TODO 1: build a data specialist Agent(model=make_model(), tools=db_tools, hooks=[ApprovalHook()], "
-            "callback_handler=None) and return consult(specialist, query, specialist_results, 'data')"
+            "TODO 1: build a data specialist Agent(model=make_model(), system_prompt=<what it does, and that "
+            "headcount means active employees>, tools=db_tools, hooks=[ApprovalHook()], callback_handler=None) "
+            "and return consult(specialist, query, specialist_results, 'data')"
         )
 
     @tool

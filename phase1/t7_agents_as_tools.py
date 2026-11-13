@@ -66,7 +66,10 @@ def build_orchestrator(db_tools: list, specialist_results: list[str]) -> Agent:
         """
         specialist = Agent(
             model=make_model(),
-            system_prompt="You are a data specialist. Query the database to answer questions.",
+            system_prompt=(
+                "You are a data specialist. Query the database to answer questions. "
+                "Headcount means active employees (status = 'active')."
+            ),
             tools=db_tools,
             hooks=[ApprovalHook()],
             callback_handler=None,
