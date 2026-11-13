@@ -26,6 +26,7 @@ package = false
 
 [tool.ruff]
 line-length = 120
+extend-exclude = ["guide"]
 target-version = "py313"
 
 [tool.ruff.lint]

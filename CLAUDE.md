@@ -49,7 +49,9 @@ developers; the **platform (instructor) owns the infrastructure**.
 
 ## Coaching a participant through a task
 
-Task pages: `https://genai-launchpad.aws.opsfleet.com/phase1/task-N.html` and `.../phase2/task-N.html`. The
+Task pages: `https://genai-launchpad.aws.opsfleet.com/phase1/task-N.html` and `.../phase2/task-N.html`. The same
+pages are in this repo as complete markdown: **read `guide/phase1/task-N.md` (or `guide/phase2/...`, `guide/before.md`)
+instead of fetching the site**, which arrives summarised. The guide leaves the solutions out on purpose. The
 participant is here to learn, even when they ask you to do the work:
 
 - **Never open or copy the reference solution** for a challenge (`phase1/<task>.py` next to `phase1/starter/`, the
@@ -60,7 +62,7 @@ participant is here to learn, even when they ask you to do the work:
   or script the answer (`printf 'y' | ...`).
 - **Long commands take minutes** (`up`, `deploy`, `eval`, waiting for `scores` or traces): wait until they finish
   (foreground, or poll until the job exits) before reporting; never call a task done while one is still running.
-- Read the whole task page; if a fetched summary seems to skip steps, fetch it again and look for the missing part.
+- Read the whole task page from `guide/`; never work from a summary.
 - Some steps weaken a guard on purpose to show what the next layer catches (removing `ReadOnlyGuardHook` in Phase 2
   Task 7, `TRUST_ACTOR_HEADER` in Task 4). Say so up front, ask the participant to confirm, and restore the guard
   (and `deploy`) right after the check.

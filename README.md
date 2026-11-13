@@ -43,6 +43,9 @@ Runtimes + Gateway ─► CloudWatch GenAI Observability (5, aws/spans) ─► A
    · custom code evaluators (exact_numbers Lambda; rubric judge calling its model through LiteLLM)
 ```
 
+`guide/` holds every workshop page as markdown (without the solutions), for reading offline or giving to a
+coding assistant.
+
 ## Participant setup
 ```bash
 git clone https://github.com/Opsfleet/genai-launchpad.git datastream-bootcamp
