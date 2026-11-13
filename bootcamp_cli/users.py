@@ -9,6 +9,8 @@
   them. They are deleted afterwards. Their memory records stay in your memory until `down`.
 """
 
+import base64
+import json
 import logging
 import secrets
 import uuid
@@ -21,6 +23,12 @@ log = logging.getLogger(__name__)
 
 PASSWORD_SUFFIX = "Aa1!"
 """Appended to a random token so a generated password meets any Cognito password policy."""
+
+
+def jwt_claims(token: str) -> dict:
+    """The claims of a JWT: its middle base64url part, decoded WITHOUT checking the signature (for inspection only)."""
+    payload = token.split(".")[1]
+    return json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
 
 
 def story_users(out: dict) -> list[str]:

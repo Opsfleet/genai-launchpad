@@ -120,7 +120,7 @@ returns an empty answer, it prints `[fallback] Empty final answer (try another M
 specialist result. A specialist that raises or answers with nothing reports "The data specialist failed: ..." to the
 orchestrator (`consult`), whose prompt forbids invented numbers and placeholders such as `[count]`. The SQL guard lets read-only schema PRAGMAs (`PRAGMA table_info(employees)`) through.
 
-Cost depends on the model. With `gpt-6-luna` or `claude-haiku-5-5`, Phase 1 costs about $0.04-0.25 and Phase 2 with the optional pages about $0.05-0.30 (`claude-sonnet-5-5` about 20 times more), well within the default budget of $5. On `nova-2-lite`, Task 4 is ~$0.04 and one 10-item `eval` ~$0.04 for its `rubric_judge`. AgentCore's built-in evaluators bill the class AWS account, not your LiteLLM budget (`uv run bootcamp.py llm budget` shows your spend).
+Cost depends on the model. With `gpt-6-luna` or `claude-haiku-5-5`, Phase 1 costs about $0.04-0.25 and Phase 2 with the optional pages about $0.05-0.30 (`claude-sonnet-5-5` about 20 times more), well within the default budget of $10. Claude Code in a browser workspace (Haiku by default) adds well under $1 for the whole bootcamp. On `nova-2-lite`, Task 4 is ~$0.04 and one 10-item `eval` ~$0.04 for its `rubric_judge`. AgentCore's built-in evaluators bill the class AWS account, not your LiteLLM budget (`uv run bootcamp.py llm budget` shows your spend).
 
 | Task | Script | Concept |
 |---|---|---|

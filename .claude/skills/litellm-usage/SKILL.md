@@ -29,7 +29,7 @@ uv run bootcamp.py llm
 # LITELLM_BASE_URL=https://...
 # MODELS=<every model your instructor enabled>
 # MODEL_ID=<your .env MODEL_ID, else the class default>
-# BUDGET=$0.123400 spent of $5
+# BUDGET=$0.123400 spent of $10
 ```
 
 `uv run bootcamp.py llm models` lists each model with its Bedrock id, price
@@ -149,7 +149,7 @@ per command (`MODEL_ID=<model> uv run bootcamp.py ...`; Phase 2: then `deploy`).
   check the model in the response.
 
 Cost depends on the model. With `gpt-6-luna` or `claude-haiku-5-5`: Phase 1 ~$0.04-0.25, Phase 2 with the
-optional pages ~$0.05-0.30 (default budget $5); `claude-sonnet-5-5` ~20x more. On `nova-2-lite` Task 4 is ~$0.04, one
+optional pages ~$0.05-0.30 (default budget $10); `claude-sonnet-5-5` ~20x more. On `nova-2-lite` Task 4 is ~$0.04, one
 10-item `eval` ~$0.04 for its `rubric_judge`. AgentCore's built-in
 evaluators bill the class AWS account, not your budget. Phase 1 scripts print a
 `[budget] $x of $y used ...` line after each run (warns at 75 %).

@@ -127,7 +127,7 @@ agent's packages (~1 min), its output goes to `.build/local-agent/agent.log`, an
 Every `test` at stage 4 and every `invoke` spends LLM budget — run the
 narrowest `--only` you need and check `llm` now and then. Cost depends on the
 model. With `gpt-6-luna` or `claude-haiku-5-5`: Phase 1 ~$0.04-0.25, Phase 2 with the
-optional pages ~$0.05-0.30 (default budget $5); `claude-sonnet-5-5` ~20x more. On `nova-2-lite` Task 4 is ~$0.04, one
+optional pages ~$0.05-0.30 (default budget $10); `claude-sonnet-5-5` ~20x more. On `nova-2-lite` Task 4 is ~$0.04, one
 10-item `eval` ~$0.04 for its `rubric_judge`.
 
 Evaluations are the exception: AgentCore's built-in judges (`eval` and the

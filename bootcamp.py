@@ -31,6 +31,7 @@ Add --verbose anywhere (or BOOTCAMP_VERBOSE=1) for full terraform output and deb
 """
 
 import argparse
+import json
 import logging
 import re
 import subprocess
@@ -245,7 +246,8 @@ def _run_eval(ctx: Context, args: argparse.Namespace) -> evaluate.Report:
 
 def cmd_token(ctx: Context, args: argparse.Namespace) -> int:
     out = ctx.participant_outputs()
-    print(users.user_token(ctx.session, out, args.actor) if args.actor else agentcore.get_token(out))
+    token = users.user_token(ctx.session, out, args.actor) if args.actor else agentcore.get_token(out)
+    print(json.dumps(users.jwt_claims(token), indent=2) if args.claims else token)
     return 0
 
 
@@ -468,6 +470,7 @@ def add_invoke(sub, common: argparse.ArgumentParser) -> None:
     )
     token = sub.add_parser("token", parents=[common], help="print a Cognito access token (default: M2M)")
     token.add_argument("--actor", help="print this user's access token instead (signs in like `invoke --actor`)")
+    token.add_argument("--claims", action="store_true", help="print the token's decoded claims instead of the token")
 
 
 def add_observe_commands(sub, common: argparse.ArgumentParser) -> None:

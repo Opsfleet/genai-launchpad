@@ -122,3 +122,11 @@ def test_print_stream_json_prints_raw_events(capsys: pytest.CaptureFixture[str])
     invoke.print_stream([{"delta": "hi"}, {"response": "hi"}], as_json=True)
     lines = capsys.readouterr().out.splitlines()
     assert [json.loads(line) for line in lines] == [{"delta": "hi"}, {"response": "hi"}]
+
+
+def test_jwt_claims_decode_the_unpadded_middle_part() -> None:
+    import base64 as b64
+
+    claims = {"scope": "datastream/mcp.access", "n": 1}
+    payload = b64.urlsafe_b64encode(json.dumps(claims).encode()).decode().rstrip("=")
+    assert users.jwt_claims(f"header.{payload}.signature") == claims

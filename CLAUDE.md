@@ -16,7 +16,7 @@ developers; the **platform (instructor) owns the infrastructure**.
   they can only touch `awsworkshop-<name>-*` resources. AccessDenied on
   someone else's resource, on IAM, or on direct Bedrock is by design.
 - No direct Bedrock: every model call goes through the Opsfleet LiteLLM
-  gateway, keyless, against a per-participant budget (default $5). Models:
+  gateway, keyless, against a per-participant budget (default $10). Models:
   whatever the instructor enabled (real Bedrock names); `uv run bootcamp.py llm
   models` lists them with prices, the class default, suggestions and quirks.
   `MODEL_ID` in `.env` is optional (empty = class default). Never hardcode or request API keys. The gateway lets participants call only model routes
@@ -47,6 +47,21 @@ developers; the **platform (instructor) owns the infrastructure**.
     worth measuring; never run `eval` in a loop; never load-test the deployed agent.
   - When iterating, prefer `--evaluators exact_numbers` (no model) or `rubric_judge` (on the LiteLLM budget).
 
+## Coaching a participant through a task
+
+Task pages: `https://genai-launchpad.aws.opsfleet.com/phase1/task-N.html` and `.../phase2/task-N.html`. The
+participant is here to learn, even when they ask you to do the work:
+
+- **Never open or copy the reference solution** for a challenge (`phase1/<task>.py` next to `phase1/starter/`, the
+  site's solution blocks) unless the participant explicitly asks for the solution. Work from the task page, the
+  starter file and the docs, and explain each change in a sentence or two so they could make it themselves.
+- **Human-in-the-loop prompts are the participant's to answer.** When a command asks for approval (Phase 1 Task 5's
+  `y/N` before a destructive query, or any confirmation), stop and let the participant run it and answer; never pipe
+  or script the answer (`printf 'y' | ...`).
+- **Long commands take minutes** (`up`, `deploy`, `eval`, waiting for `scores` or traces): wait until they finish
+  (foreground, or poll until the job exits) before reporting; never call a task done while one is still running.
+- Read the whole task page; if a fetched summary seems to skip steps, fetch it again and look for the missing part.
+
 ## Core loop
 
 ```bash
@@ -54,7 +69,7 @@ uv run bootcamp.py doctor        # pre-flight: tools, .env, role, gateway, netwo
 uv run bootcamp.py up N          # provision stages 0..N
 uv run bootcamp.py deploy        # after editing phase2/app code (or MODEL_ID)
 uv run bootcamp.py test --only N # verify one stage
-uv run bootcamp.py invoke "..." --actor alice-chen   # signs in as that Cognito user; 20s-2m, up to ~5 min
+uv run bootcamp.py invoke "..." --actor alice-chen   # signs in as that Cognito user; usually 10-40 s
 uv run bootcamp.py invoke "..." --stream             # print the answer as it is generated (SSE), tool calls inline
 uv run bootcamp.py invoke "..." --session last       # reuse the warm session (faster, keeps the conversation)
 uv run bootcamp.py invoke "..." --json               # raw JSON reply (default: answer + one line per extra field)
