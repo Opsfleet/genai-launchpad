@@ -8,7 +8,7 @@ description: Shows a DataStream Corp bootcamp participant how to call the Opsfle
 There is **no direct Bedrock** in the bootcamp: the participant role and
 every role it creates carry an explicit deny on `bedrock:InvokeModel` /
 `Converse`. All model traffic goes to the Opsfleet LiteLLM gateway, which
-bills a **per-participant budget** (default $5) inside your company team's
+bills a **per-participant budget** (default $10) inside your company team's
 budget (`bootcamp-<company>`).
 
 Auth is **keyless**: each request carries header `X-Amz-Sts-Identity-Url`, a

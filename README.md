@@ -61,7 +61,8 @@ workshop role, then search the console for "SageMaker AI" > Studio > Open Studio
 name) > Run space, then Open. Everything above is already done there: the repo is in `~/datastream-bootcamp`, `.env`
 is filled in, and the CLI uses your workshop role without an access key. Open a terminal and start with
 `cd ~/datastream-bootcamp && uv run bootcamp.py doctor`. The space stops after an hour without activity; your files
-stay.
+stay. Type `claude` there for Claude Code: it already uses the gateway with your key (Haiku by default,
+`/model sonnet` when you need more) and its status line shows your budget left.
 
 | `.env` key | Meaning |
 |---|---|
@@ -319,7 +320,7 @@ and `NONE` together with `none`, are rejected; the stage-4 guardrail check expec
   - Participants may call only the model routes (`/v1/chat/completions`, `/v1/models`, `/v1/messages`, ...) and
     `/key/info`; anything else (admin routes, LiteLLM's `/bedrock/...` pass-through) answers 403.
   - `LITELLM_API_KEY` is supported as a fallback for tools that can't sign.
-- **Budgets.** Each key has `max_budget` (default $5) and belongs to its company's team `bootcamp-<company>`, which has a hard cap shared by that company's participants, so nothing can go rogue.
+- **Budgets.** Each key has `max_budget` (default $10) and belongs to its company's team `bootcamp-<company>`, which has a hard cap shared by that company's participants, so nothing can go rogue.
 - **Tag isolation.** Each participant role carries `Participant=<p>`. One shared policy uses `${aws:PrincipalTag/Participant}`:
   - for ARNs that carry names (IAM roles, S3, logs, secrets, AgentCore names)
   - as `aws:RequestTag` / `aws:ResourceTag` conditions on AgentCore and Cognito
